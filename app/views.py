@@ -34,7 +34,7 @@ def registration(request):
 
             send_mail('User registration',
             'Regiistration is success full',
-            'harshadvali1432@gmail.com',
+            'narasar198@gmail.com',
             [UFO.email],fail_silently=False)
 
 
@@ -69,3 +69,44 @@ def profile_info(request):
     PFD=Profile.objects.get(user=USD)
     d={'USD':USD,'PFD':PFD}
     return render(request,'profile_info.html',d)
+
+
+@login_required
+def change_password(request):
+    if request.method=='POST':
+        username=request.session.get('username')
+        npw=request.POST['npw']
+        cpw=request.POST['cpw']
+        if npw==cpw:
+            USO=User.objects.get(username=username)
+            USO.set_password(cpw)
+            USO.save()
+            return HttpResponseRedirect(reverse('user_login'))
+
+    return render(request,'change_password.html')
+
+
+def reset_password(request):
+    # this is the reset or forgot password for user login
+    if request.method=='POST':
+        username=request.POST['username']
+        npw=request.POST['npw']
+        cpw=request.POST['cpw']
+        if npw==cpw:
+            LUSO=User.objects.filter(username=username)
+            # it gives list of objects
+            if LUSO:
+                LUSO[0].set_password(cpw)
+                LUSO[0].save()
+
+                send_mail('change_password',
+                'changing the password or RESET password is successfully changed',
+                'narasar198@gmail.com',
+                [LUSO[0].email],fail_silently=False)
+
+                return HttpResponseRedirect(reverse('user_login'))
+            else:
+                return HttpResponse('this user is not available in my database')
+
+    return render(request,'reset_password.html')
+    
